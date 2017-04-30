@@ -18,7 +18,6 @@ import org.junit.Test;
 import dao.connections.ConnectionFTP;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Map;
 import org.apache.commons.net.ftp.FTPReply;
 import test.CommonsTest;
 import static test.CommonsTest.SERVER1_USER;

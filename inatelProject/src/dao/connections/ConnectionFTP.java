@@ -1,12 +1,7 @@
 package dao.connections;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.SocketException;
-import java.util.HashMap;
-import java.util.Map;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
