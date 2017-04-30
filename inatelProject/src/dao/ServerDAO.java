@@ -16,60 +16,90 @@ import model.Server;
 public class ServerDAO {
     ConnectionDB b = new ConnectionDB();
 
-    public void insertServer(Server server){
+    public void saveServer(Server server){
         Statement comando = b.conectDB();
+        
+        Server serverSaved = findServerByAddress(server.getAddress());
 
-        try {
-            comando.executeUpdate("INSERT INTO T_SERVER (user, password, address) VALUES('" + 
-                    server.getUser() + "', '" + 
-                    server.getPassword() + "', '" + 
-                    server.getAddress() + "');");
-            System.out.println("Server inserted with success!");
-        } catch (SQLException e) {
-            printError("Erro ao inserir Pessoa", e.getMessage());
-        } finally {
-            b.disconectDB();
+        if(serverSaved == null) {
+            try {
+                comando.executeUpdate("INSERT INTO T_SERVER (user, password, address) VALUES('" + 
+                        server.getUser() + "', '" + 
+                        server.getPassword() + "', '" + 
+                        server.getAddress() + "');");
+                System.out.println("Server inserted with success!");
+            } catch (SQLException e) {
+                printError("Error to insert Server.", e.getMessage());
+            } finally {
+                b.disconectDB();
+            }
+        } else {
+            printError("Error to insert Server. This address already exists!", "");
         }
     }
     
-    public List<Server> findServers(String address) {
+    public List<Server> findAllServers() {
         Statement comando = b.conectDB();
-        List<Server> resultados = new ArrayList<Server>();
-        ResultSet rs;
+        List<Server> listServer = new ArrayList<>();
+        ResultSet resultSet;
+
+        try {
+            resultSet = comando.executeQuery("SELECT * FROM T_SERVER;");
+
+            while (resultSet.next()) {
+                Server serverTemp = new Server();
+                serverTemp.setId(resultSet.getInt("id"));
+                serverTemp.setUser(resultSet.getString("user"));
+                serverTemp.setPassword(resultSet.getString("password"));
+                serverTemp.setAddress(resultSet.getString("address"));
+                listServer.add(serverTemp);
+            }
+
+            return listServer;
+        } catch (SQLException e) {
+            printError("Error to get All Servers.", e.getMessage());
+            return null;
+        }
+    }
+    
+    public Server findServerByAddress(String address) {
+        Statement comando = b.conectDB();
+        ResultSet rs = null;
 
         try {
             rs = comando.executeQuery("SELECT * FROM T_SERVER WHERE ADDRESS LIKE '" + address + "';");
 
-            while (rs.next()) {
-                Server temp = new Server();
-                temp.setId(rs.getInt("id"));
-                temp.setUser(rs.getString("user"));
-                temp.setPassword(rs.getString("password"));
-                temp.setAddress(rs.getString("address"));
-                resultados.add(temp);
+            if(rs != null) {
+                while (rs.next()) {
+                    Server server = new Server();
+                    server.setId(rs.getInt("id"));
+                    server.setUser(rs.getString("user"));
+                    server.setPassword(rs.getString("password"));
+                    server.setAddress(rs.getString("address"));
+                    
+                    return server;
+                }
             }
 
-            return resultados;
+            return null;
         } catch (SQLException e) {
-            printError("Erro ao buscar pessoa", e.getMessage());
+            printError("Error to find Server with address: " + address, e.getMessage());
             return null;
         }
-   }
+    }
     
     public void removeServer(Server server){
         Statement comando = b.conectDB();
-        List<Server> serverList = findServers(server.getAddress());
+        Server serverSaved = findServerByAddress(server.getAddress());
 
-        if(!serverList.isEmpty()) {
-            for (Server item : serverList) {
-                try {
-                    comando.executeUpdate("DELETE FROM T_SERVER WHERE ID = '" + item.getId() + "';");
-                    System.out.println("Server with id: " + item.getId() + " removed");
-                } catch (SQLException e) {
-                    printError("Error to delete Server with id: " + item.getId(), e.getMessage());
-                } finally {
-                    b.disconectDB();
-                }
+        if(serverSaved != null) {
+            try {
+                comando.executeUpdate("DELETE FROM T_SERVER WHERE ID = '" + serverSaved.getId() + "';");
+                System.out.println("Server with id: " + serverSaved.getId() + " removed");
+            } catch (SQLException e) {
+                printError("Error to delete Server with id: " + serverSaved.getId(), e.getMessage());
+            } finally {
+                b.disconectDB();
             }
         }
     }

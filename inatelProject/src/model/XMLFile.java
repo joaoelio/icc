@@ -14,6 +14,7 @@ public class XMLFile {
     private int id;
     private String name;
     private String content;
+    private String addressServer;
 
     public int getId() {
         return id;
@@ -37,6 +38,14 @@ public class XMLFile {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public String getAddressServer() {
+        return addressServer;
+    }
+
+    public void setAddressServer(String addressServer) {
+        this.addressServer = addressServer;
     }
     
     @Override

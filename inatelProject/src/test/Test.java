@@ -5,8 +5,9 @@
  */
 package test;
 
+import controller.ServerController;
 import dao.ServerDAO;
-import dao.XMLFilesDAO;
+import dao.XMLFileDAO;
 import dao.connections.ConnectionFTP;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,13 +26,13 @@ public class Test {
         
         System.out.println("test new inatelProject");
         
-        List<Server> listServer = new ArrayList<Server>();
-        listServer.add(createServer("inatel", "inatel", "192.168.0.21"));
-        listServer.add(createServer("inatel", "inatel", "192.168.0.21"));
+        List<Server> listServer = new ArrayList<>();
+        listServer.add(ServerController.createServer("inatel", "inatel", "192.168.0.21"));
+        listServer.add(ServerController.createServer("inatel", "inatel", "192.168.0.21"));
         
         for(Server itemServer : listServer) {
             ServerDAO serverDAO = new ServerDAO();
-            serverDAO.insertServer(itemServer);
+            serverDAO.saveServer(itemServer);
             
             ConnectionFTP connectionFTP = new ConnectionFTP();
             Map<String, String> mapXMLFiles = new HashMap<>();
@@ -42,21 +43,12 @@ public class Test {
                 xmlFile.setName(key);
                 xmlFile.setContent(mapXMLFiles.get(key));
 
-                XMLFilesDAO xmlFileDAO = new XMLFilesDAO();
-                xmlFileDAO.insertXMLFile(xmlFile);
+                XMLFileDAO xmlFileDAO = new XMLFileDAO();
+                xmlFileDAO.saveXMLFile(xmlFile);
             }
             
-            System.out.println(serverDAO.findServers(itemServer.getAddress()).get(0).toString());
+            System.out.println(serverDAO.findServerByAddress(itemServer.getAddress()).toString());
         }
         //serverDAO.removeServer(server);
-    }
-    
-    public static Server createServer(String user, String password, String address) {
-        Server server = new Server();
-        server.setUser(user);
-        server.setPassword(password);
-        server.setAddress(address);
-        
-        return server;
     }
 }
