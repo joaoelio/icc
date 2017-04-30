@@ -6,29 +6,27 @@
 package test.java;
 
 import controller.FTPServerController;
+import controller.ServerController;
 import dao.ServerDAO;
 import dao.XMLFileDAO;
-import dao.connections.ConnectionFTP;
 import java.util.List;
 import model.Server;
 import model.XMLFile;
 import org.apache.commons.net.ftp.FTPClient;
 import org.junit.Assert;
 import org.junit.Test;
-import test.CommonsTest;
-import static test.CommonsTest.SERVER_ADDRESS;
-import static test.CommonsTest.SERVER_PASSWORD;
-import static test.CommonsTest.SERVER_USER;
-import static test.CommonsTest.XMLFILE_CONTENT;
-import static test.CommonsTest.XMLFILE_NAME;
 import dao.connections.ConnectionFTP;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import org.apache.commons.net.ftp.FTPReply;
 import test.CommonsTest;
-import static test.CommonsTest.SERVER_USER;
-import static test.CommonsTest.SERVER_PASSWORD;
-import static test.CommonsTest.SERVER_ADDRESS;
+import static test.CommonsTest.SERVER1_USER;
+import static test.CommonsTest.SERVER1_PASSWORD;
+import static test.CommonsTest.SERVER1_ADDRESS;
+import static test.CommonsTest.SERVER2_USER;
+import static test.CommonsTest.SERVER2_PASSWORD;
+import static test.CommonsTest.SERVER2_ADDRESS;
 
 /**
  *
@@ -36,35 +34,38 @@ import static test.CommonsTest.SERVER_ADDRESS;
  */
 public class FTPServerTest {
     
+    //Testing only connection with the FTP Server
     @Test
     public void testConnectFTPServer() throws IOException {
-        FTPClient ftpClient = ConnectionFTP.connectFTP(SERVER_USER, SERVER_PASSWORD, SERVER_ADDRESS);
+        FTPClient ftpClient = ConnectionFTP.connectFTP(SERVER1_USER, SERVER1_PASSWORD, SERVER1_ADDRESS);
         
         Assert.assertEquals(FTPReply.isPositiveCompletion( ftpClient.getReplyCode() ), true);
         
-        ftpClient = ConnectionFTP.diconnectFTP(ftpClient, SERVER_ADDRESS);
+        ftpClient = ConnectionFTP.diconnectFTP(ftpClient, SERVER1_ADDRESS);
         
         Assert.assertEquals(ftpClient.isConnected(), false);
     }
     
+    //Testing if exists files .xml in FTP Server
     @Test
     public void testExistFileXMLFTPServer() throws IOException {
-        FTPClient ftpClient = ConnectionFTP.connectFTP(SERVER_USER, SERVER_PASSWORD, SERVER_ADDRESS);
+        FTPClient ftpClient = ConnectionFTP.connectFTP(SERVER1_USER, SERVER1_PASSWORD, SERVER1_ADDRESS);
         Assert.assertEquals(FTPReply.isPositiveCompletion( ftpClient.getReplyCode() ), true);
         
         Map<String, String> mapXMLFiles = FTPServerController.findFilesXMLFTPServer(ftpClient);
         Assert.assertEquals(mapXMLFiles.isEmpty(), false);
         
-        ftpClient = ConnectionFTP.diconnectFTP(ftpClient, SERVER_ADDRESS);
+        ftpClient = ConnectionFTP.diconnectFTP(ftpClient, SERVER1_ADDRESS);
         Assert.assertEquals(ftpClient.isConnected(), false);
     }
     
+    //Test save File .xml of FTP Server in Database
     @Test
     public void testSaveFileXMLFTPServerInDB() throws IOException {
         
-        Server serverSaved = CommonsTest.saveServerTest(SERVER_USER, SERVER_PASSWORD, SERVER_ADDRESS);
+        Server serverSaved = CommonsTest.saveServerTest(SERVER1_USER, SERVER1_PASSWORD, SERVER1_ADDRESS);
         
-        FTPClient ftpClient = ConnectionFTP.connectFTP(SERVER_USER, SERVER_PASSWORD, SERVER_ADDRESS);
+        FTPClient ftpClient = ConnectionFTP.connectFTP(SERVER1_USER, SERVER1_PASSWORD, SERVER1_ADDRESS);
         Assert.assertEquals(FTPReply.isPositiveCompletion( ftpClient.getReplyCode() ), true);
         
         Map<String, String> mapXMLFiles = FTPServerController.findFilesXMLFTPServer(ftpClient);
@@ -76,29 +77,62 @@ public class FTPServerTest {
             xmlFile.setContent(mapXMLFiles.get(key));
             xmlFile.setAddressServer(serverSaved.getAddress());
 
-            List<XMLFile> xmlFileSavedRecent = CommonsTest.saveXMLFileTest(xmlFile.getName(), xmlFile.getContent(), xmlFile.getAddressServer());
+            XMLFile xmlFileSavedRecent = CommonsTest.saveXMLFileTest(xmlFile.getName(), xmlFile.getContent(), xmlFile.getAddressServer());
             
             XMLFileDAO xmlFileDAO = new XMLFileDAO();
-            boolean thisXMLFileExists = false;
-            List<XMLFile> listXMLFile = xmlFileDAO.findXMLFileByName(xmlFile.getName());
+            xmlFileDAO.removeXMLFile(xmlFileSavedRecent);
             
-            for(XMLFile itemXMLFile : listXMLFile) {
-                if(itemXMLFile.getName().equals(xmlFile.getName()) && 
-                        itemXMLFile.getContent().equals(xmlFile.getContent()) && 
-                        itemXMLFile.getAddressServer().equals(xmlFile.getAddressServer())) {
-                    thisXMLFileExists = true;
-                    xmlFileDAO.removeXMLFile(itemXMLFile);
-                }
-            }
-            
-            Assert.assertEquals(thisXMLFileExists, true);
+            Assert.assertEquals(xmlFileDAO.findXMLFileById(xmlFileSavedRecent.getId()), null);
         }
         
         ServerDAO serverDAO = new ServerDAO();
         serverDAO.removeServer(serverSaved);
         
-        ftpClient = ConnectionFTP.diconnectFTP(ftpClient, SERVER_ADDRESS);
+        Assert.assertEquals(serverDAO.findServerByAddress(serverSaved.getAddress()), null);
+        
+        ftpClient = ConnectionFTP.diconnectFTP(ftpClient, SERVER1_ADDRESS);
         Assert.assertEquals(ftpClient.isConnected(), false);
     }
     
+    //Test save File .xml of TWO FTP Servers in Database
+    @Test
+    public void testSaveFileXMLFTPServersInDB() throws IOException {
+        
+        List<Server> listServer = new ArrayList<>();
+        listServer.add(ServerController.createServer(SERVER1_USER, SERVER1_PASSWORD, SERVER1_ADDRESS));
+        listServer.add(ServerController.createServer(SERVER2_USER, SERVER2_PASSWORD, SERVER2_ADDRESS));
+                
+        for(Server itemServer : listServer) {
+            Server serverSaved = CommonsTest.saveServerTest(
+                    itemServer.getUser(), itemServer.getPassword(), itemServer.getAddress());
+            FTPClient ftpClient = ConnectionFTP.connectFTP(
+                    serverSaved.getUser(), serverSaved.getPassword(), serverSaved.getAddress());
+            Assert.assertEquals(FTPReply.isPositiveCompletion( ftpClient.getReplyCode() ), true);
+
+            Map<String, String> mapXMLFiles = FTPServerController.findFilesXMLFTPServer(ftpClient);
+            Assert.assertEquals(mapXMLFiles.isEmpty(), false);
+
+            for(String key : mapXMLFiles.keySet()) {
+                XMLFile xmlFile = new XMLFile();
+                xmlFile.setName(key);
+                xmlFile.setContent(mapXMLFiles.get(key));
+                xmlFile.setAddressServer(itemServer.getAddress());
+
+                XMLFile xmlFileSavedRecent = CommonsTest.saveXMLFileTest(xmlFile.getName(), xmlFile.getContent(), xmlFile.getAddressServer());
+
+                XMLFileDAO xmlFileDAO = new XMLFileDAO();
+                xmlFileDAO.removeXMLFile(xmlFileSavedRecent);
+
+                Assert.assertEquals(xmlFileDAO.findXMLFileById(xmlFileSavedRecent.getId()), null);
+            }
+
+            ServerDAO serverDAO = new ServerDAO();
+            serverDAO.removeServer(serverSaved);
+
+            Assert.assertEquals(serverDAO.findServerByAddress(serverSaved.getAddress()), null);
+
+            ftpClient = ConnectionFTP.diconnectFTP(ftpClient, SERVER1_ADDRESS);
+            Assert.assertEquals(ftpClient.isConnected(), false);
+        }
+    }
 }

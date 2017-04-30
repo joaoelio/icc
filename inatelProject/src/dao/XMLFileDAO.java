@@ -102,7 +102,11 @@ public class XMLFileDAO {
                 listXMLFile.add(xmlFileTemp);
             }
 
-            return listXMLFile.get(0);
+            if(listXMLFile.isEmpty()) {
+                return null;
+            } else {
+                return listXMLFile.get(0);
+            }
         } catch (SQLException e) {
             printError("Error to Find XML File with Id: " + id, e.getMessage());
             return null;

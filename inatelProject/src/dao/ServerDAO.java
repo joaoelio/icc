@@ -27,7 +27,7 @@ public class ServerDAO {
                         server.getUser() + "', '" + 
                         server.getPassword() + "', '" + 
                         server.getAddress() + "');");
-                System.out.println("Server with Address: " + server.getAddress() + " inserted with success!");
+                System.out.println("\n\nServer with Address: " + server.getAddress() + " inserted with success!");
             } catch (SQLException e) {
                 printError("Error to insert Server with Address: " + server.getAddress(), e.getMessage());
             } finally {

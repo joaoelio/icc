@@ -31,17 +31,22 @@ public class FTPServerController {
             String[] allFiles = ftpClient.listNames();
             
             if(allFiles.length > 0) {
-                System.out.println("\nListing files '.xml':");
+                System.out.println("Listing files '.xml':");
                 
                 for(String itemAllFilles : allFiles) {
                     if(itemAllFilles.endsWith(".xml")) {
-                        System.out.println(itemAllFilles);
+                        bufferedReader = null;
+                        contentXML = null;
+        
+                        System.out.println("    " + itemAllFilles);
                         InputStream inputStream = ftpClient.retrieveFileStream(itemAllFilles);
-                        bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-                        contentXML = org.apache.commons.io.IOUtils.toString(bufferedReader);
-                        
-                        mapXMLFiles.put(itemAllFilles, contentXML);
-                        //System.out.println("\n\n\n\nContent XML File: \n" + contentXML);
+                        if(inputStream != null) {
+                            bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+                            contentXML = org.apache.commons.io.IOUtils.toString(bufferedReader);
+
+                            mapXMLFiles.put(itemAllFilles, contentXML);
+                            //System.out.println("\n\n\n\nContent XML File: \n" + contentXML);
+                        }
                     }
                 }
             }      

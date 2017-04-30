@@ -15,11 +15,11 @@ import model.XMLFile;
 import org.junit.Assert;
 import org.junit.Test;
 import test.CommonsTest;
-import static test.CommonsTest.SERVER_ADDRESS;
-import static test.CommonsTest.SERVER_PASSWORD;
-import static test.CommonsTest.SERVER_USER;
 import static test.CommonsTest.XMLFILE_CONTENT;
 import static test.CommonsTest.XMLFILE_NAME;
+import static test.CommonsTest.SERVER1_USER;
+import static test.CommonsTest.SERVER1_PASSWORD;
+import static test.CommonsTest.SERVER1_ADDRESS;
 
 /**
  *
@@ -30,21 +30,19 @@ public class XMLFileTest {
     @Test
     public void testCreateXMLFile() {
         
-        Server serverSaved = CommonsTest.saveServerTest(SERVER_USER, SERVER_PASSWORD, SERVER_ADDRESS);
+        Server serverSaved = CommonsTest.saveServerTest(SERVER1_USER, SERVER1_PASSWORD, SERVER1_ADDRESS);
         
-        List<XMLFile> listXMLFileSaved = CommonsTest.saveXMLFileTest(XMLFILE_NAME, XMLFILE_CONTENT, serverSaved.getAddress());
+        XMLFile xmlFileSaved = CommonsTest.saveXMLFileTest(XMLFILE_NAME, XMLFILE_CONTENT, serverSaved.getAddress());
         
-        for(XMLFile itemXMLFileSaved : listXMLFileSaved) {
-            Assert.assertEquals(XMLFILE_NAME, itemXMLFileSaved.getName());
-            Assert.assertEquals(XMLFILE_CONTENT, itemXMLFileSaved.getContent());
-            Assert.assertEquals(serverSaved.getAddress(), itemXMLFileSaved.getAddressServer());
+        Assert.assertEquals(XMLFILE_NAME, xmlFileSaved.getName());
+        Assert.assertEquals(XMLFILE_CONTENT, xmlFileSaved.getContent());
+        Assert.assertEquals(serverSaved.getAddress(), xmlFileSaved.getAddressServer());
 
-            XMLFileDAO xmlFileDAO = new XMLFileDAO();
-            xmlFileDAO.removeXMLFile(itemXMLFileSaved);
+        XMLFileDAO xmlFileDAO = new XMLFileDAO();
+        xmlFileDAO.removeXMLFile(xmlFileSaved);
 
-            Assert.assertEquals(xmlFileDAO.findXMLFileByName(itemXMLFileSaved.getName()).isEmpty(), true);
-        }
-        
+        Assert.assertEquals(xmlFileDAO.findXMLFileById(xmlFileSaved.getId()), null);
+
         ServerDAO serverDAO = new ServerDAO();
         serverDAO.removeServer(serverSaved);
     }

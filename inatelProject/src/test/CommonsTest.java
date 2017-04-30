@@ -19,9 +19,12 @@ import model.XMLFile;
  */
 public class CommonsTest {
     
-    public static final String SERVER_USER = "inatel";
-    public static final String SERVER_PASSWORD = "inatel";
-    public static final String SERVER_ADDRESS = "192.168.0.21";
+    public static final String SERVER1_USER = "inatel";
+    public static final String SERVER1_PASSWORD = "inatel";
+    public static final String SERVER1_ADDRESS = "192.168.0.21";
+    public static final String SERVER2_USER = "inatel";
+    public static final String SERVER2_PASSWORD = "inatel";
+    public static final String SERVER2_ADDRESS = "192.168.0.21";
     
     public static final String XMLFILE_NAME = "xmlFile01";
     public static final String XMLFILE_CONTENT = "test XML";
@@ -34,12 +37,12 @@ public class CommonsTest {
         ServerDAO serverDAO = new ServerDAO();
         serverDAO.saveServer(server);
         
-        Server serverSaved = serverDAO.findServerByAddress(SERVER_ADDRESS);
+        Server serverSaved = serverDAO.findServerByAddress(SERVER1_ADDRESS);
         
         return serverSaved;
     }
     
-    public static List<XMLFile> saveXMLFileTest(String nameXMLFile, String contentXMLFile, String serverAddress) {
+    public static XMLFile saveXMLFileTest(String nameXMLFile, String contentXMLFile, String serverAddress) {
         
         XMLFile xmlFile = new XMLFile();
         xmlFile = XMLFileController.createXMLFile(nameXMLFile, contentXMLFile, serverAddress);
@@ -47,7 +50,16 @@ public class CommonsTest {
         XMLFileDAO xmlFileDAO = new XMLFileDAO();
         xmlFileDAO.saveXMLFile(xmlFile);
         
-        List<XMLFile> xmlFileSaved = xmlFileDAO.findXMLFileByName(xmlFile.getName());
+        List<XMLFile> listXMLFileSaved = xmlFileDAO.findXMLFileByName(xmlFile.getName());
+        XMLFile xmlFileSaved = null;
+        
+        for(XMLFile itemXMLFile : listXMLFileSaved) {
+            if(itemXMLFile.getName().equals(xmlFile.getName()) && 
+                        itemXMLFile.getContent().equals(xmlFile.getContent()) && 
+                        itemXMLFile.getAddressServer().equals(xmlFile.getAddressServer())) {
+                xmlFileSaved = itemXMLFile;
+            }
+        }
         
         return xmlFileSaved;
     }
