@@ -36,7 +36,7 @@ public class Test {
             
             ConnectionFTP connectionFTP = new ConnectionFTP();
             Map<String, String> mapXMLFiles = new HashMap<>();
-            mapXMLFiles = connectionFTP.connect(itemServer.getUser(), itemServer.getPassword(), itemServer.getAddress());
+            //mapXMLFiles = connectionFTP.connectFTP(itemServer.getUser(), itemServer.getPassword(), itemServer.getAddress());
             
             for(String key : mapXMLFiles.keySet()) {
                 XMLFile xmlFile = new XMLFile();

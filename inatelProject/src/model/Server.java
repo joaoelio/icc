@@ -50,6 +50,6 @@ public class Server {
     
     @Override
     public String toString(){
-        return "Server id: " + this.getId() + " address: " + this.getAddress();
+        return "Server Address: " + this.getAddress();
     }
 }

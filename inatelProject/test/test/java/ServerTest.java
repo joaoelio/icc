@@ -10,6 +10,10 @@ import dao.ServerDAO;
 import model.Server;
 import org.junit.Assert;
 import org.junit.Test;
+import test.CommonsTest;
+import static test.CommonsTest.SERVER_ADDRESS;
+import static test.CommonsTest.SERVER_PASSWORD;
+import static test.CommonsTest.SERVER_USER;
 
 /**
  *
@@ -20,15 +24,15 @@ public class ServerTest {
     @Test
     public void testCreateServer() {
         
-        Server server = ServerController.createServer("inatel", "inatel", "192.168.0.21");
+        Server serverSaved = CommonsTest.saveServerTest(SERVER_USER, SERVER_PASSWORD, SERVER_ADDRESS);
+        
+        Assert.assertEquals(SERVER_USER, serverSaved.getUser());
+        Assert.assertEquals(SERVER_PASSWORD, serverSaved.getPassword());
+        Assert.assertEquals(SERVER_ADDRESS, serverSaved.getAddress());
         
         ServerDAO serverDAO = new ServerDAO();
-        serverDAO.saveServer(server);
+        serverDAO.removeServer(serverSaved);
         
-        Server serverSaved = serverDAO.findServerByAddress("192.168.0.21");
-        
-        Assert.assertEquals(server.getUser(), serverSaved.getUser());
-        Assert.assertEquals(server.getUser(), serverSaved.getUser());
-        Assert.assertEquals(server.getPassword(), serverSaved.getPassword());
+        Assert.assertEquals(serverDAO.findServerByAddress(serverSaved.getAddress()), null);
     }
 }

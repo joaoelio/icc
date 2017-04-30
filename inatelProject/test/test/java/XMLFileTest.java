@@ -9,9 +9,17 @@ import controller.ServerController;
 import controller.XMLFileController;
 import dao.ServerDAO;
 import dao.XMLFileDAO;
+import java.util.List;
 import model.Server;
 import model.XMLFile;
+import org.junit.Assert;
 import org.junit.Test;
+import test.CommonsTest;
+import static test.CommonsTest.SERVER_ADDRESS;
+import static test.CommonsTest.SERVER_PASSWORD;
+import static test.CommonsTest.SERVER_USER;
+import static test.CommonsTest.XMLFILE_CONTENT;
+import static test.CommonsTest.XMLFILE_NAME;
 
 /**
  *
@@ -22,23 +30,22 @@ public class XMLFileTest {
     @Test
     public void testCreateXMLFile() {
         
-        Server server = createServer();
+        Server serverSaved = CommonsTest.saveServerTest(SERVER_USER, SERVER_PASSWORD, SERVER_ADDRESS);
         
-        XMLFile xmlFile = new XMLFile();
-        xmlFile = XMLFileController.createXMLFile("xmlFile01", "contentXML", server.getAddress());
+        List<XMLFile> listXMLFileSaved = CommonsTest.saveXMLFileTest(XMLFILE_NAME, XMLFILE_CONTENT, serverSaved.getAddress());
         
-        XMLFileDAO xmlFileDAO = new XMLFileDAO();
-        xmlFileDAO.saveXMLFile(xmlFile);
-    }
-    
-    private Server createServer() {
-        Server server = ServerController.createServer("inatel", "inatel", "192.168.0.21");
+        for(XMLFile itemXMLFileSaved : listXMLFileSaved) {
+            Assert.assertEquals(XMLFILE_NAME, itemXMLFileSaved.getName());
+            Assert.assertEquals(XMLFILE_CONTENT, itemXMLFileSaved.getContent());
+            Assert.assertEquals(serverSaved.getAddress(), itemXMLFileSaved.getAddressServer());
+
+            XMLFileDAO xmlFileDAO = new XMLFileDAO();
+            xmlFileDAO.removeXMLFile(itemXMLFileSaved);
+
+            Assert.assertEquals(xmlFileDAO.findXMLFileByName(itemXMLFileSaved.getName()).isEmpty(), true);
+        }
         
         ServerDAO serverDAO = new ServerDAO();
-        serverDAO.saveServer(server);
-        
-        Server serverSaved = serverDAO.findServerByAddress("192.168.0.21");
-        
-        return serverSaved;
+        serverDAO.removeServer(serverSaved);
     }
 }

@@ -23,7 +23,7 @@ public class ConnectionDB {
         try {
             con = DriverManager.getConnection(URL_DB, NAME_DB, PASSWORD_DB);
             statement = con.createStatement();
-            System.out.println("Connected to the Database: " + NAME_DB);
+            //System.out.println("Connected to the Database: " + NAME_DB);
         } catch (SQLException e) {
             printError("Error to connect to the Database: " + NAME_DB, e.getMessage());
         }
@@ -35,7 +35,7 @@ public class ConnectionDB {
         try {
             statement.close();
             con.close();
-            System.out.println("Close connection");
+            //System.out.println("Close connection");
         } catch (SQLException e) {
             printError("Error to close connection", e.getMessage());
         }

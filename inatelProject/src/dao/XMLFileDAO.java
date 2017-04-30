@@ -12,7 +12,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JOptionPane;
-import model.Server;
 import model.XMLFile;
 
 /**
@@ -30,9 +29,9 @@ public class XMLFileDAO {
                     xmlFile.getName() + "', '" + 
                     xmlFile.getContent() + "', '" +
                     xmlFile.getAddressServer() + "');");
-            System.out.println("XML File inserted with success!");
+            System.out.println("XML File with Name: " + xmlFile.getName() + " inserted with success!");
         } catch (SQLException e) {
-            printError("Error to insert XML File.", e.getMessage());
+            printError("Error to insert XML File with Name: " + xmlFile.getName(), e.getMessage());
         } finally {
             b.disconectDB();
         }
@@ -68,7 +67,7 @@ public class XMLFileDAO {
         ResultSet rs;
 
         try {
-            rs = statement.executeQuery("SELECT * FROM T_XML_FILE WHERE ADDRESS LIKE '" + name + "';");
+            rs = statement.executeQuery("SELECT * FROM T_XML_FILE WHERE NAME LIKE '" + name + "';");
 
             while (rs.next()) {
                 XMLFile xmlFileTemp = new XMLFile();
@@ -84,23 +83,48 @@ public class XMLFileDAO {
             printError("Error to Find XML File with Name: " + name, e.getMessage());
             return null;
         }
-   }
+    }
+    
+    public XMLFile findXMLFileById(int id) {
+        Statement statement = b.conectDB();
+        List<XMLFile> listXMLFile = new ArrayList<>();
+        ResultSet rs;
+
+        try {
+            rs = statement.executeQuery("SELECT * FROM T_XML_FILE WHERE ID LIKE '" + id + "';");
+
+            while (rs.next()) {
+                XMLFile xmlFileTemp = new XMLFile();
+                xmlFileTemp.setId(rs.getInt("id"));
+                xmlFileTemp.setName(rs.getString("name"));
+                xmlFileTemp.setContent(rs.getString("content"));
+                xmlFileTemp.setAddressServer(rs.getString("addressServer"));
+                listXMLFile.add(xmlFileTemp);
+            }
+
+            return listXMLFile.get(0);
+        } catch (SQLException e) {
+            printError("Error to Find XML File with Id: " + id, e.getMessage());
+            return null;
+        }
+    }
+    
     
     public void removeXMLFile(XMLFile xmlFile){
         Statement statement = b.conectDB();
-        List<XMLFile> listXMLFile = findXMLFileByName(xmlFile.getName());
+        XMLFile xmlFileSaved = findXMLFileById(xmlFile.getId());
 
-        if(!listXMLFile.isEmpty()) {
-            for (XMLFile itemXMLFile : listXMLFile) {
-                try {
-                    statement.executeUpdate("DELETE FROM T_XML_FILE WHERE ID = '" + itemXMLFile.getId() + "';");
-                    System.out.println("Server with id: " + itemXMLFile.getId() + " removed");
-                } catch (SQLException e) {
-                    printError("Error to remove XML File with name: " + itemXMLFile.getName(), e.getMessage());
-                } finally {
-                    b.disconectDB();
-                }
+        if(xmlFileSaved != null) {
+            try {
+                statement.executeUpdate("DELETE FROM T_XML_FILE WHERE ID = '" + xmlFileSaved.getId() + "';");
+                System.out.println("XML File with Name: " + xmlFileSaved.getName() + " removed with success!");
+            } catch (SQLException e) {
+                printError("Error to remove XML File with name: " + xmlFileSaved.getName(), e.getMessage());
+            } finally {
+                b.disconectDB();
             }
+        } else {
+            System.out.println("XML File with Name: " + xmlFileSaved.getName() + " not found!");
         }
     }
     

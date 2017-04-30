@@ -27,14 +27,14 @@ public class ServerDAO {
                         server.getUser() + "', '" + 
                         server.getPassword() + "', '" + 
                         server.getAddress() + "');");
-                System.out.println("Server inserted with success!");
+                System.out.println("Server with Address: " + server.getAddress() + " inserted with success!");
             } catch (SQLException e) {
-                printError("Error to insert Server.", e.getMessage());
+                printError("Error to insert Server with Address: " + server.getAddress(), e.getMessage());
             } finally {
                 b.disconectDB();
             }
         } else {
-            printError("Error to insert Server. This address already exists!", "");
+            printError("Error to insert Server with Address: " + server.getAddress() + ". This address already exists!", "Error");
         }
     }
     
@@ -57,7 +57,7 @@ public class ServerDAO {
 
             return listServer;
         } catch (SQLException e) {
-            printError("Error to get All Servers.", e.getMessage());
+            printError("Error to Find All Servers.", e.getMessage());
             return null;
         }
     }
@@ -83,7 +83,7 @@ public class ServerDAO {
 
             return null;
         } catch (SQLException e) {
-            printError("Error to find Server with address: " + address, e.getMessage());
+            printError("Error to Find Server with Address: " + address, e.getMessage());
             return null;
         }
     }
@@ -95,9 +95,9 @@ public class ServerDAO {
         if(serverSaved != null) {
             try {
                 comando.executeUpdate("DELETE FROM T_SERVER WHERE ID = '" + serverSaved.getId() + "';");
-                System.out.println("Server with id: " + serverSaved.getId() + " removed");
+                System.out.println("Server with address: " + serverSaved.getAddress() + " removed with Success!");
             } catch (SQLException e) {
-                printError("Error to delete Server with id: " + serverSaved.getId(), e.getMessage());
+                printError("Error to Remove Server with Address: " + serverSaved.getAddress(), e.getMessage());
             } finally {
                 b.disconectDB();
             }
@@ -105,7 +105,7 @@ public class ServerDAO {
     }
     
     private void printError(String msg, String msgErro) {
-        JOptionPane.showMessageDialog(null, msg, "Erro crítico", 0);
+        JOptionPane.showMessageDialog(null, msg, "Error", 0);
         System.err.println(msg);
         System.out.println(msgErro);
         System.exit(0);
