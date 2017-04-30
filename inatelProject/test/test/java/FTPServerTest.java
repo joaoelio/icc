@@ -52,8 +52,8 @@ public class FTPServerTest {
         FTPClient ftpClient = ConnectionFTP.connectFTP(SERVER1_USER, SERVER1_PASSWORD, SERVER1_ADDRESS);
         Assert.assertEquals(FTPReply.isPositiveCompletion( ftpClient.getReplyCode() ), true);
         
-        Map<String, String> mapXMLFiles = FTPServerController.findFilesXMLFTPServer(ftpClient);
-        Assert.assertEquals(mapXMLFiles.isEmpty(), false);
+        List<String> listXMLFiles = FTPServerController.findFilesXMLFTPServer(ftpClient);
+        Assert.assertEquals(listXMLFiles.isEmpty(), false);
         
         ftpClient = ConnectionFTP.diconnectFTP(ftpClient, SERVER1_ADDRESS);
         Assert.assertEquals(ftpClient.isConnected(), false);
@@ -65,23 +65,22 @@ public class FTPServerTest {
         
         Server serverSaved = CommonsTest.saveServerTest(SERVER1_USER, SERVER1_PASSWORD, SERVER1_ADDRESS);
         
-        FTPClient ftpClient = ConnectionFTP.connectFTP(SERVER1_USER, SERVER1_PASSWORD, SERVER1_ADDRESS);
+        FTPClient ftpClient = ConnectionFTP.connectFTP(serverSaved.getUser(), serverSaved.getPassword(), serverSaved.getAddress());
         Assert.assertEquals(FTPReply.isPositiveCompletion( ftpClient.getReplyCode() ), true);
         
-        Map<String, String> mapXMLFiles = FTPServerController.findFilesXMLFTPServer(ftpClient);
-        Assert.assertEquals(mapXMLFiles.isEmpty(), false);
+        List<String> listNameFilesXML = FTPServerController.findFilesXMLFTPServer(ftpClient);
         
-        for(String key : mapXMLFiles.keySet()) {
-            XMLFile xmlFile = new XMLFile();
-            xmlFile.setName(key);
-            xmlFile.setContent(mapXMLFiles.get(key));
-            xmlFile.setAddressServer(serverSaved.getAddress());
-
-            XMLFile xmlFileSavedRecent = CommonsTest.saveXMLFileTest(xmlFile.getName(), xmlFile.getContent(), xmlFile.getAddressServer());
+        for(String itemNameFileXML : listNameFilesXML) {
+            ftpClient = ConnectionFTP.diconnectFTP(ftpClient, serverSaved.getAddress());
+            ftpClient = ConnectionFTP.connectFTP(serverSaved.getUser(), serverSaved.getPassword(), serverSaved.getAddress());
             
+            String contentFileXML = FTPServerController.getFileFTPServer(ftpClient, itemNameFileXML);
+
+            XMLFile xmlFileSavedRecent = CommonsTest.saveXMLFileTest(itemNameFileXML, contentFileXML, serverSaved.getAddress());
+
             XMLFileDAO xmlFileDAO = new XMLFileDAO();
             xmlFileDAO.removeXMLFile(xmlFileSavedRecent);
-            
+
             Assert.assertEquals(xmlFileDAO.findXMLFileById(xmlFileSavedRecent.getId()), null);
         }
         
@@ -101,7 +100,7 @@ public class FTPServerTest {
         List<Server> listServer = new ArrayList<>();
         listServer.add(ServerController.createServer(SERVER1_USER, SERVER1_PASSWORD, SERVER1_ADDRESS));
         listServer.add(ServerController.createServer(SERVER2_USER, SERVER2_PASSWORD, SERVER2_ADDRESS));
-                
+
         for(Server itemServer : listServer) {
             Server serverSaved = CommonsTest.saveServerTest(
                     itemServer.getUser(), itemServer.getPassword(), itemServer.getAddress());
@@ -109,16 +108,15 @@ public class FTPServerTest {
                     serverSaved.getUser(), serverSaved.getPassword(), serverSaved.getAddress());
             Assert.assertEquals(FTPReply.isPositiveCompletion( ftpClient.getReplyCode() ), true);
 
-            Map<String, String> mapXMLFiles = FTPServerController.findFilesXMLFTPServer(ftpClient);
-            Assert.assertEquals(mapXMLFiles.isEmpty(), false);
+            List<String> listNameFilesXML = FTPServerController.findFilesXMLFTPServer(ftpClient);
+        
+            for(String itemNameFileXML : listNameFilesXML) {
+                ftpClient = ConnectionFTP.diconnectFTP(ftpClient, serverSaved.getAddress());
+                ftpClient = ConnectionFTP.connectFTP(serverSaved.getUser(), serverSaved.getPassword(), serverSaved.getAddress());
 
-            for(String key : mapXMLFiles.keySet()) {
-                XMLFile xmlFile = new XMLFile();
-                xmlFile.setName(key);
-                xmlFile.setContent(mapXMLFiles.get(key));
-                xmlFile.setAddressServer(itemServer.getAddress());
+                String contentFileXML = FTPServerController.getFileFTPServer(ftpClient, itemNameFileXML);
 
-                XMLFile xmlFileSavedRecent = CommonsTest.saveXMLFileTest(xmlFile.getName(), xmlFile.getContent(), xmlFile.getAddressServer());
+                XMLFile xmlFileSavedRecent = CommonsTest.saveXMLFileTest(itemNameFileXML, contentFileXML, serverSaved.getAddress());
 
                 XMLFileDAO xmlFileDAO = new XMLFileDAO();
                 xmlFileDAO.removeXMLFile(xmlFileSavedRecent);

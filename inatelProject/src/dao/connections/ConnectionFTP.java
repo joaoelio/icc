@@ -22,7 +22,7 @@ public class ConnectionFTP {
         ftpClient.login(user, password);
 
         if(FTPReply.isPositiveCompletion( ftpClient.getReplyCode() )){
-            System.out.println("Server FTP connected: " + address);
+            System.out.println("\nServer FTP connected: " + address);
             ftpClient.enterLocalPassiveMode();
         }
         
